@@ -57,23 +57,10 @@ for i = 1:max_iter
     % Gradient descent
     W = W - (lr .* (E*W));
 
-%     % Symmetric orthonormalization (from the script I adapted)
-%     M = W * W';
-%     [vecs, vals] = eig(M, 'vector');  
-%     vals = real(vals); vecs = real(vecs); 
-%     W_sqrt = vecs ./ sqrt(vals); 
-%     W_sqrt = W_sqrt * vecs';
-%     W = W_sqrt * W;
-
     % Symmetric orthonormalization (adapted from the paper directly, should be equation 4.6)
     W = ((W * W')^(-1/2)) * W;
 %     M = W * W';
 %     W = (M^(-1/2)) * W;
-    
-%     % check orthogonality of W (debug step only)
-%     W' - inv(W) % should be zeros
-%     W * W' % should be identity matrix
-%     W * W' - eye(size(W)) % difference with identity matrix (should be zeroes)
     
     fprintf('it %d, W-change: %.8f\n', i, norm(W - W0))
     if norm(W - W0) < tol  %  ||  stopFlag
@@ -86,18 +73,10 @@ disp '... iterations finished'
 % Independent sources (up to an unknown permutation y = Q * s)
 Y = W * Z;
 
-% Compute the mixing matrix A' = A * Q.T
-% (which is A up to a permutation of its columns)
-% from the identity y = Q * s = W * V * A * s.
-% It then holds x = A * s = A * Q.T * y = A' * y.
-% Note: A' is computed as the right Moore-Penrose
-% inverse of W * V, but A' may not be unique since
-% in general p != num_sources and any right inverse
-% could be taken as A'.
+% Compute the mixing matrix 
 WV = W * V;
 WV_ =  WV * WV'; 
-WV_ = WV' / WV_; % RS: code analyzer suggested this instead of the commented line below
-% WV_ = inv(WV_); WV_ = WV' * WV_; 
+WV_ = WV' / WV_; 
 
 sources = Y;
 mixingmatrix = WV_;
